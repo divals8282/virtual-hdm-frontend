@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { FileInput } from "./components/FileInput"
 import { Container } from "./styled"
-import { ToastContainer } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 function App() {
   const [pemFile, setPemFile] = useState<File | null>(null);
   const [certFile, setCertFile] = useState<File | null>(null);
 
-  console.log({
-    pemFile,
-    certFile
-  })
-
+  const sentAction = () => {
+    if(!pemFile || !certFile) {
+      toast('Please seleect files')
+    }
+  }
 
   return (
     <Container>
@@ -20,7 +20,7 @@ function App() {
         <FileInput onChange={(file) => setPemFile(file)} label="Upload .pem file" extension=".pem" />
         <FileInput onChange={(file) => setCertFile(file)} label="Upload .cert file" extension=".cert" />
         <div className="actions">
-          <button className="submit-button" type="submit">Sent</button>
+          <button onClick={() => sentAction()} className="submit-button" type="submit">Sent</button>
         </div>
       </form>
 
