@@ -1,13 +1,19 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Container } from './styled';
 import { toast } from 'react-toastify';
 import { ComponentT } from './types';
 
-export const FileInput: ComponentT = ({ label, extension, onChange }) => {
+export const FileInput: ComponentT = ({ file, label, extension, onChange }) => {
 
   const [fileName, setFileName] = useState(label);
   const fileInputRef = useRef<HTMLInputElement>();
-  
+
+  useEffect(() => {
+    if (file) {
+      setFileName(file.name)
+    }
+  }, [file])
+
   return (
     <Container>
       <p>{fileName}</p>
@@ -15,20 +21,20 @@ export const FileInput: ComponentT = ({ label, extension, onChange }) => {
       <input accept={extension} ref={fileInputRef} onChange={() => {
         const file = fileInputRef.current.files[0];
         const regexp = new RegExp('[0-9]{8}', 'g');
-        
+
         const name = file.name.replace(/\.[^/.]+$/, "");
         const isValidName = regexp.test(name);
 
-        if(!isValidName) {
+        if (!isValidName) {
           fileInputRef.current.value = "";
           toast('Invalid file name');
           setFileName(label);
+          onChange(null)
           return false;
         }
-        
+
         onChange(file);
-        setFileName(file.name)
-      }} type='file' hidden/>
+      }} type='file' hidden />
     </Container>
   )
 }

@@ -9,7 +9,16 @@ function App() {
   const sentAction = () => {
     if(!pemFile || !certFile) {
       toast('Please seleect files')
+
+      return false;
     }
+
+    const formData = new FormData()
+
+    formData.append('files[]', pemFile)
+    formData.append('files[]', certFile)
+
+    console.log('send files via axios')
   }
 
   return (
@@ -17,10 +26,10 @@ function App() {
       <form onSubmit={(e) => {
         e.preventDefault();
       }}>
-        <FileInput onChange={(file) => setPemFile(file)} label="Upload .pem file" extension=".pem" />
-        <FileInput onChange={(file) => setCertFile(file)} label="Upload .cert file" extension=".cert" />
+        <FileInput file={pemFile} onChange={(file) => setPemFile(file)} label="Upload .pem file" extension=".pem" />
+        <FileInput file={certFile} onChange={(file) => setCertFile(file)} label="Upload .cert file" extension=".cert" />
         <div className="actions">
-          <button onClick={() => sentAction()} className="submit-button" type="submit">Sent</button>
+          <button onClick={() => sentAction()} className="submit-button" type="submit">SEND</button>
         </div>
       </form>
 
