@@ -8,7 +8,7 @@ export const Container = styled.div`
   .action-button {
     cursor: pointer;
     height: 40px;
-    background-color: #64f16f;
+    background-color: #6564f1;
     color: white;
     font-family: "Roboto";
     border: none;
