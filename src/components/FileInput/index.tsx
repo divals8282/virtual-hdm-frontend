@@ -20,7 +20,7 @@ export const FileInput: ComponentT = ({ file, label, extension, onChange }) => {
       <button type='button' className='action-button' onClick={() => fileInputRef.current.click()}>Set File</button>
       <input accept={extension} ref={fileInputRef} onChange={() => {
         const file = fileInputRef.current.files[0];
-        const regexp = new RegExp('[0-9]{8}', 'g');
+        const regexp = /^\d{8}_\d{8}$/;
 
         const name = file.name.replace(/\.[^/.]+$/, "");
         const isValidName = regexp.test(name);

@@ -5,6 +5,12 @@ export const Container = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  p {
+    max-width: 135px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
   .action-button {
     cursor: pointer;
     height: 40px;
