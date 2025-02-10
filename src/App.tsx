@@ -2,12 +2,14 @@ import { useMemo, useState } from "react";
 import { FileInput } from "./components/FileInput";
 import { Container } from "./styled";
 import { toast, ToastContainer } from "react-toastify";
+import axios from "axios";
 function App() {
-  const [pemFile, setPemFile] = useState<File | null>(null);
-  const [certFile, setCertFile] = useState<File | null>(null);
+  const [keyFile, setKeyFile] = useState<File | null>(null);
+  const [crtFile, setCrtFile] = useState<File | null>(null);
   const [connection, setConnection] = useState("");
   const [activateCRN, setActivateCRN] = useState("");
   const [general, setGeneral] = useState({
+    seq: 0,
     cardAmount: 0,
     cashAmount: 0,
     partialAmount: 0,
@@ -47,8 +49,8 @@ function App() {
     return true;
   }, [item]);
 
-  const sendAction = () => {
-    if (!certFile) {
+  const sendCertificates = () => {
+    if (!crtFile) {
       toast("Please seleect files");
 
       return false;
@@ -56,9 +58,25 @@ function App() {
 
     const formData = new FormData();
 
-    formData.append("files[]", certFile);
+    formData.append("crt", crtFile);
+    formData.append("key", keyFile);
 
-    console.log("send files via axios");
+    axios
+      .post<{ status: string }>(
+        "http://188.34.157.194:8019/uploadCertificates",
+        formData,
+        {
+          headers: {
+            "content-type": "multipart/form-data",
+          },
+        }
+      )
+      .then((res) => {
+        toast.success(res.data.status);
+      })
+      .catch((err) => {
+        toast.error(err.response.data.error);
+      });
   };
 
   const addItemAction = () => {
@@ -81,6 +99,63 @@ function App() {
     setItems([...items, itemCopy]);
   };
 
+  const checkConnection = () => {
+    if (!activateCRN) {
+      toast.warn("write CRN at top pannel");
+      return false;
+    }
+
+    axios
+      .post(
+        "http://188.34.157.194:8019/checkConnection",
+        {
+          crn: activateCRN,
+        },
+        {
+          headers: {
+            "content-type": "application/json",
+          },
+        }
+      )
+      .then(() => {
+        setConnection("connected");
+      });
+  };
+
+  const activateHDM = () => {
+    axios
+      .post<{ result: string }>("http://188.34.157.194:8019/activate", {
+        crn: activateCRN,
+      })
+      .then((res) => {
+        toast.success(res.data.result);
+      });
+  };
+
+  const printFR = () => {
+
+    if(!items.length) {
+      toast.warn('Add items');
+      return false;
+    }
+
+    if(!activateCRN) {
+      toast.warn('Enter crn at top');
+      return false;
+    }
+    
+    axios.post('http://188.34.157.194:8019/print', {
+      seq: 10,
+      crn: activateCRN,
+      ...general,
+      items
+    }).then(() => {
+      toast.success('Success')
+    }).catch(() => {
+      toast.error('something wrong')
+    })
+  }
+
   return (
     <Container>
       <form
@@ -89,23 +164,38 @@ function App() {
         }}
       >
         <div className="head-actions">
+          <div className="activate-hdm">
+            <input
+              value={activateCRN}
+              onChange={({ target }) => setActivateCRN(target.value)}
+              placeholder="crn"
+            />
+            <button onClick={() => activateHDM()}>Activate</button>
+          </div>
           <div className="check-connection">
             <div
-              className={`connection connection--${connection ? "connected" : "no-connection"
-                }`}
+              className={`connection connection--${
+                connection ? "connected" : "no-connection"
+              }`}
             />
             <p>{connection ? "connected!" : "no connection"}</p>
-            <button>check</button>
-          </div>
-          <div className="activate-hdm">
-            <input value={activateCRN} placeholder="crn" />
-            <button>Activate</button>
+            <button onClick={() => checkConnection()}>check</button>
           </div>
         </div>
         <div className="content">
           <div className="form">
             <div className="box">
               <h1>General</h1>
+            </div>
+            <div className="box">
+              <label>Seq</label>
+              <input
+                value={general.seq}
+                onChange={({ target }) =>
+                  setGeneral({ ...general, seq: Number(target.value) })
+                }
+                type="number"
+              />
             </div>
             <div className="box">
               <label>Card Amount</label>
@@ -316,33 +406,41 @@ function App() {
               return (
                 <div className="item" key={index + item.goodName}>
                   <p className="name">{item.goodName}</p>
-                  <div className="action" onClick={() => setItems(items.filter((_item, i) => i !== index))}>x</div>
+                  <div
+                    className="action"
+                    onClick={() =>
+                      setItems(items.filter((_item, i) => i !== index))
+                    }
+                  >
+                    x
+                  </div>
                 </div>
-              )
+              );
             })}
+            <button onClick={() => printFR()}>Print FR</button>
           </div>
         </div>
         <div className="actions">
           <div className="files-container">
             <FileInput
-              file={certFile}
-              onChange={(file) => setCertFile(file)}
-              label="Upload .cert file"
-              extension=".cert"
+              file={crtFile}
+              onChange={(file) => setCrtFile(file)}
+              label="Upload .crt file"
+              extension=".crt"
             />
             <FileInput
-              file={pemFile}
-              onChange={(file) => setPemFile(file)}
-              label="Upload .pem file"
-              extension=".pem"
+              file={keyFile}
+              onChange={(file) => setKeyFile(file)}
+              label="Upload .key file"
+              extension=".key"
             />
           </div>
           <button
-            onClick={() => sendAction()}
+            onClick={() => sendCertificates()}
             className="submit-button"
             type="submit"
           >
-            SEND
+            SEND CERTIFICATES
           </button>
         </div>
       </form>

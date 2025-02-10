@@ -13,6 +13,15 @@ export const Container = styled.div`
     gap: 10px;
   }
 
+  button {
+    background-color: #6564f1;
+    border: none;
+    color: white;
+    font-family: "Roboto";
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
   .head-actions {
     display: flex;
     justify-content: space-between;
@@ -22,15 +31,6 @@ export const Container = styled.div`
       display: flex;
       align-items: center;
       gap: 10px;
-      button {
-        background-color: #6564f1;
-        border: none;
-        color: white;
-        font-family: "Roboto";
-        border-radius: 10px;
-        cursor: pointer;
-        font-size: 1rem;
-      }
       .connection {
         width: 10px;
         height: 10px;
